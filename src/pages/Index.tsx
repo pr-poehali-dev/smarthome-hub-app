@@ -181,7 +181,7 @@ export default function Index() {
           </div>
         </div>
       ) : (
-        <>
+        <Tabs value={currentView} onValueChange={(v) => setCurrentView(v as any)} className="w-full">
           <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border">
             <div className="container mx-auto px-4 py-4">
               <div className="flex items-center justify-between mb-4">
@@ -190,18 +190,16 @@ export default function Index() {
                   <Icon name="User" size={20} />
                 </Button>
               </div>
-              <Tabs value={currentView} onValueChange={(v) => setCurrentView(v as any)} className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="home" className="gap-2">
-                    <Icon name="Home" size={16} />
-                    Устройства
-                  </TabsTrigger>
-                  <TabsTrigger value="dashboard" className="gap-2">
-                    <Icon name="LayoutDashboard" size={16} />
-                    Дашборд
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="home" className="gap-2">
+                  <Icon name="Home" size={16} />
+                  Устройства
+                </TabsTrigger>
+                <TabsTrigger value="dashboard" className="gap-2">
+                  <Icon name="LayoutDashboard" size={16} />
+                  Дашборд
+                </TabsTrigger>
+              </TabsList>
             </div>
           </div>
 
@@ -371,7 +369,7 @@ export default function Index() {
               </Card>
             </TabsContent>
           </div>
-        </>
+        </Tabs>
       )}
     </div>
   );
