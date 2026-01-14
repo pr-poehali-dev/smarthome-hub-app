@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import Icon from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
+import { api } from '@/lib/api';
+import { authStorage } from '@/lib/auth';
+import { useToast } from '@/hooks/use-toast';
 
 type Device = {
   id: string;
@@ -38,20 +42,62 @@ const activities = [
 ];
 
 export default function Index() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [devices, setDevices] = useState<Device[]>(mockDevices);
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
   const [currentView, setCurrentView] = useState<'home' | 'dashboard' | 'device'>('home');
 
-  const toggleDevice = (id: string) => {
-    setDevices(devices.map(d => 
-      d.id === id ? { ...d, active: !d.active, power: d.active ? 0 : (d.power || 50) } : d
-    ));
+  useEffect(() => {
+    if (!authStorage.isAuthenticated()) {
+      navigate('/auth');
+      return;
+    }
+    loadDevices();
+  }, [navigate]);
+
+  const loadDevices = async () => {
+    try {
+      const response = await api.devices.getAll();
+      if (response.devices) {
+        setDevices(response.devices);
+      }
+    } catch (error) {
+      console.error('Failed to load devices', error);
+    }
   };
 
-  const updateDeviceValue = (id: string, value: number) => {
+  const toggleDevice = async (id: string) => {
+    const device = devices.find(d => d.id === id);
+    if (!device) return;
+
+    const newState = !device.active;
+    
+    setDevices(devices.map(d => 
+      d.id === id ? { ...d, active: newState, power: newState ? (d.power || 50) : 0 } : d
+    ));
+
+    try {
+      await api.devices.sendAction(id, newState ? 'turn_on' : 'turn_off');
+      toast({ title: newState ? 'Устройство включено' : 'Устройство выключено' });
+    } catch (error) {
+      setDevices(devices.map(d => 
+        d.id === id ? { ...d, active: device.active } : d
+      ));
+      toast({ title: 'Ошибка', description: 'Не удалось изменить состояние', variant: 'destructive' });
+    }
+  };
+
+  const updateDeviceValue = async (id: string, value: number) => {
     setDevices(devices.map(d => 
       d.id === id ? { ...d, value } : d
     ));
+
+    try {
+      await api.devices.sendAction(id, 'set_value', value);
+    } catch (error) {
+      toast({ title: 'Ошибка', description: 'Не удалось обновить значение', variant: 'destructive' });
+    }
   };
 
   const activeDevices = devices.filter(d => d.active).length;
@@ -186,9 +232,14 @@ export default function Index() {
             <div className="container mx-auto px-4 py-4">
               <div className="flex items-center justify-between mb-4">
                 <h1 className="text-2xl font-bold">SmartHome Hub</h1>
-                <Button variant="ghost" size="icon">
-                  <Icon name="User" size={20} />
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" size="icon" onClick={() => navigate('/security')}>
+                    <Icon name="Shield" size={20} />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => navigate('/profile')}>
+                    <Icon name="User" size={20} />
+                  </Button>
+                </div>
               </div>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="home" className="gap-2">
@@ -251,7 +302,11 @@ export default function Index() {
                 ))}
               </div>
 
-              <Button className="w-full gap-2 animate-scale-in" style={{ animationDelay: '0.3s' }}>
+              <Button 
+                className="w-full gap-2 animate-scale-in" 
+                style={{ animationDelay: '0.3s' }}
+                onClick={() => navigate('/add-device')}
+              >
                 <Icon name="Plus" size={20} />
                 Добавить устройство
               </Button>
