@@ -108,6 +108,18 @@ export default function Profile() {
     navigate('/auth');
   };
 
+  const handleRoleChange = (newRole: string) => {
+    if (user) {
+      const updatedUser = { ...user, role: newRole as any };
+      setUser(updatedUser);
+      authStorage.setUser(updatedUser);
+      toast({ 
+        title: 'Роль изменена', 
+        description: `Теперь вы ${getRoleBadge(newRole).label}` 
+      });
+    }
+  };
+
   const getRoleBadge = (role: string) => {
     const badges = {
       owner: { label: 'Владелец', variant: 'default' as const },
@@ -192,6 +204,41 @@ export default function Profile() {
               </div>
             </div>
           )}
+        </Card>
+
+        <Card className="p-6 space-y-4 animate-slide-up bg-blue-500/5 border-blue-500/20" style={{ animationDelay: '0.05s' }}>
+          <div className="flex items-start gap-3">
+            <Icon name="TestTube" size={20} className="text-blue-500 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h3 className="font-semibold mb-2">Режим тестирования: Выбор роли</h3>
+              <p className="text-xs text-muted-foreground mb-4">
+                Выберите роль для тестирования функционала приложения
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant={user?.role === 'owner' ? 'default' : 'outline'}
+                  onClick={() => handleRoleChange('owner')}
+                >
+                  Владелец
+                </Button>
+                <Button
+                  size="sm"
+                  variant={user?.role === 'admin' ? 'default' : 'outline'}
+                  onClick={() => handleRoleChange('admin')}
+                >
+                  Администратор
+                </Button>
+                <Button
+                  size="sm"
+                  variant={user?.role === 'member' ? 'default' : 'outline'}
+                  onClick={() => handleRoleChange('member')}
+                >
+                  Член семьи
+                </Button>
+              </div>
+            </div>
+          </div>
         </Card>
 
         <Card className="p-6 space-y-4 animate-slide-up" style={{ animationDelay: '0.1s' }}>

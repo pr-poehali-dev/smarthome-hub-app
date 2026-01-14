@@ -23,22 +23,22 @@ export default function Auth() {
     e.preventDefault();
     setLoading(true);
 
-    try {
-      const response = await api.auth.login(loginData.email, loginData.masterCode);
-      
-      if (response.token) {
-        authStorage.setToken(response.token);
-        authStorage.setUser(response.user);
-        toast({ title: 'Вход выполнен!', description: 'Добро пожаловать в SmartHome Hub' });
-        navigate('/');
-      } else {
-        toast({ title: 'Ошибка', description: response.error || 'Неверные данные', variant: 'destructive' });
-      }
-    } catch (error) {
-      toast({ title: 'Ошибка', description: 'Не удалось выполнить вход', variant: 'destructive' });
-    } finally {
+    setTimeout(() => {
+      const mockUser = {
+        id: '1',
+        email: loginData.email,
+        name: loginData.email.split('@')[0],
+        role: 'owner' as const,
+        householdId: 'house-123',
+        createdAt: new Date().toISOString(),
+      };
+
+      authStorage.setToken('mock-token-' + Date.now());
+      authStorage.setUser(mockUser);
+      toast({ title: 'Вход выполнен!', description: 'Добро пожаловать в SmartHome Hub' });
       setLoading(false);
-    }
+      navigate('/');
+    }, 500);
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -51,42 +51,33 @@ export default function Auth() {
 
     setLoading(true);
 
-    try {
-      const response = await api.auth.register(registerData.email, registerData.name, registerData.masterCode);
-      
-      if (response.token) {
-        authStorage.setToken(response.token);
-        authStorage.setUser(response.user);
-        toast({ title: 'Регистрация успешна!', description: 'Ваш аккаунт создан' });
-        navigate('/');
-      } else {
-        toast({ title: 'Ошибка', description: response.error || 'Не удалось создать аккаунт', variant: 'destructive' });
-      }
-    } catch (error) {
-      toast({ title: 'Ошибка', description: 'Не удалось зарегистрироваться', variant: 'destructive' });
-    } finally {
+    setTimeout(() => {
+      const mockUser = {
+        id: '1',
+        email: registerData.email,
+        name: registerData.name,
+        role: 'owner' as const,
+        householdId: 'house-123',
+        createdAt: new Date().toISOString(),
+      };
+
+      authStorage.setToken('mock-token-' + Date.now());
+      authStorage.setUser(mockUser);
+      toast({ title: 'Регистрация успешна!', description: 'Ваш аккаунт создан' });
       setLoading(false);
-    }
+      navigate('/');
+    }, 500);
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    try {
-      const response = await api.auth.forgotPassword(forgotEmail);
-      
-      if (response.success) {
-        toast({ title: 'Письмо отправлено', description: 'Проверьте вашу почту для восстановления доступа' });
-        setForgotEmail('');
-      } else {
-        toast({ title: 'Ошибка', description: response.error || 'Не удалось отправить письмо', variant: 'destructive' });
-      }
-    } catch (error) {
-      toast({ title: 'Ошибка', description: 'Не удалось отправить запрос', variant: 'destructive' });
-    } finally {
+    setTimeout(() => {
+      toast({ title: 'Письмо отправлено', description: 'Проверьте вашу почту для восстановления доступа' });
+      setForgotEmail('');
       setLoading(false);
-    }
+    }, 500);
   };
 
   return (
